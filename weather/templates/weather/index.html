@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Прогноз погоды{% endblock title %}
+{% block content %}
+	<h1>Прогноз погоды</h1>
+
+	<form method="POST">
+		{% csrf_token %}
+		<input type="text" name="city" placeholder="Введите город" required>
+		<input type="hidden" name="lat">
+		<input type="hidden" name="lon">
+		<input type="hidden" name="display_name">
+		<button type="submit">Показать погоду</button>
+	</form>
+
+	{% if city_name %}
+		<h2>Прогноз погоды для: {{ city_name }}</h2>
+	{% endif %}
+
+	{% if error %}
+		<p class="error">{{ error }}</p>
+	{% endif %}
+
+	{% if weather.current %}
+		<h2>Температура: {{ weather.current.temperature }} °C</h2>
+		<p>Ветер: {{ weather.current.windspeed }} км/ч</p>
+	{% endif %}
+
+	{% if weather.hourly %}
+		<h2>Почасовой прогноз на сутки:</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Время</th>
+					<th>Температура</th>
+					<th>Погода</th>
+					<th>Ветер</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for hour in weather.hourly %}
+					<tr>
+						<td>{{ hour.time | date:"d.m H:i" }}</td>
+						<td>{{ hour.temp }}°C</td>
+						<td>{{ hour.code }}</td>
+						<td>{{ hour.wind }} м/с</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	{% endif %}
+
+	{% if history %}
+		<h3>Вы недавно смотрели:</h3>
+		<ul>
+			{% for city in history %}
+				<li><a href="{% url 'city_redirect' %}?name={{ city|urlencode }}">{{ city }}</a></li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+{% endblock content %}
